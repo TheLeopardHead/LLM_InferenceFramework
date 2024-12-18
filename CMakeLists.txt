@@ -3,7 +3,11 @@ cmake_minimum_required(VERSION 3.16)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Set the CUDA compiler path or name
-set(CMAKE_CUDA_COMPILER "/usr/local/cuda/bin/nvcc")
+# set(CMAKE_CUDA_COMPILER "/usr/local/cuda/bin/nvcc")
+set(CMAKE_CUDA_COMPILER "/cluster/apps/cuda/12.3/bin/nvcc")
+set(CUDA_TOOLKIT_ROOT_DIR "/cluster/apps/cuda/12.3")
+set(CUDA_TOOLKIT_INCLUDE_DIRS "${CUDA_TOOLKIT_ROOT_DIR}/include")
+set(CUDA_TOOLKIT_LIBRARY_DIRS "${CUDA_TOOLKIT_ROOT_DIR}/lib64")
 
 project(llama_infer CXX CUDA)
 include(cmake/cuda.cmake)
@@ -12,6 +16,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 set(CMAKE_CUDA_STANDARD 14)
+
+# 添加CUDA库路径
+link_directories(${CUDA_TOOLKIT_LIBRARY_DIRS})
 
 option(LLAMA3_SUPPORT OFF)
 if (LLAMA3_SUPPORT)
@@ -82,6 +89,9 @@ find_package(GTest REQUIRED)
 find_package(glog REQUIRED)
 find_package(Armadillo REQUIRED)
 
+# 查找CUDA包
+find_package(CUDA REQUIRED)
+
 aux_source_directory(kuiper/source/tensor/ DIR_TENSOR)
 aux_source_directory(kuiper/source/base/ DIR_BASE)
 aux_source_directory(kuiper/source/op/ DIR_OP)
@@ -94,13 +104,13 @@ aux_source_directory(kuiper/source/sampler DIR_SAMPLE)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 
 add_library(llama SHARED ${DIR_TENSOR} ${DIR_BASE} ${DIR_OP} ${DIR_KERNEL} ${DIR_MODEL} ${DIR_KERNEL_CPU} ${DIR_KERNEL_CUDA} ${DIR_KERNEL} ${DIR_SAMPLE})
-target_link_libraries(llama sentencepiece glog::glog gtest gtest_main pthread cudart armadillo)
-target_link_directories(llama PUBLIC ${CMAKE_CUDA_COMPILER_LIBRARY_ROOT}/lib64)
+target_link_libraries(llama sentencepiece glog::glog gtest gtest_main pthread ${CUDA_LIBRARIES} ${CUDA_CUDART_LIBRARY} armadillo)
+target_link_directories(llama PUBLIC ${CUDA_TOOLKIT_LIBRARY_DIRS})
 
 target_include_directories(llama PUBLIC ${glog_INCLUDE_DIR})
 target_include_directories(llama PUBLIC ${PROJECT_SOURCE_DIR}/kuiper/include)
 target_include_directories(llama PUBLIC ${Armadillo_INCLUDE_DIR})
-target_include_directories(llama PUBLIC ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+target_include_directories(llama PUBLIC ${CUDA_INCLUDE_DIRS})
 
 if(USE_CPM)
   # Add sentencepiece include directory
