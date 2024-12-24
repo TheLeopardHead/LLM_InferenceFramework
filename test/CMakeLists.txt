@@ -2,7 +2,7 @@ include(../cmake/cuda.cmake)
 find_package(GTest REQUIRED)
 find_package(glog REQUIRED)
 
-set(link_ext_lib glog::glog GTest::gtest)
+set(link_ext_lib GTest::gtest GTest::gtest_main glog::glog)
 aux_source_directory(../test DIR_TEST)
 
 aux_source_directory(../test/test_cu DIR_TEST_CU)

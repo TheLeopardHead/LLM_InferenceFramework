@@ -65,6 +65,8 @@ python export.py llama2_7b.bin --meta-llama path/to/llama/model/7B
   cmake ..
   # 或者开启 USE_CPM 选项，自动下载第三方依赖
   cmake -DUSE_CPM=ON ..
+  # 集群环境下编译命令
+  cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local -DUSE_CPM=ON ..
   make -j16
 ```
 

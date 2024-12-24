@@ -17,7 +17,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 set(CMAKE_CUDA_STANDARD 14)
 
-# 添加CUDA库路径
+# Add CUDA library path
 link_directories(${CUDA_TOOLKIT_LIBRARY_DIRS})
 
 option(LLAMA3_SUPPORT OFF)
@@ -35,6 +35,8 @@ endif()
 option(USE_CPM "Use CPM for dependency management" OFF)
 
 if(USE_CPM)
+  # Set CPM cache directory to avoid downloading dependencies every time
+  set(CPM_SOURCE_CACHE ${CMAKE_SOURCE_DIR}/.cpm_cache)
   # Use CPM to manage dependencies
   include(cmake/CPM.cmake)
 
@@ -89,7 +91,7 @@ find_package(GTest REQUIRED)
 find_package(glog REQUIRED)
 find_package(Armadillo REQUIRED)
 
-# 查找CUDA包
+# Find CUDA package
 find_package(CUDA REQUIRED)
 
 aux_source_directory(kuiper/source/tensor/ DIR_TENSOR)
