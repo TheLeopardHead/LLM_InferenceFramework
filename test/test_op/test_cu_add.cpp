@@ -3,7 +3,32 @@
 #include <gtest/gtest.h>
 #include "../source/op/kernels/kernels_interface.h"
 #include "../utils.cuh"
+#include "../utils.h"
 #include "base/buffer.h"
+
+TEST (test_add_cpu, add1) {
+  auto alloc_cpu = base::CPUDeviceAllocatorFactory::get_instance();
+
+  int32_t size = 32 * 151;
+
+  tensor::Tensor t1(base::DataType::kDataTypeFp32, size, true, alloc_cpu);
+  tensor::Tensor t2(base::DataType::kDataTypeFp32, size, true, alloc_cpu);
+  tensor::Tensor out(base::DataType::kDataTypeFp32, size, true, alloc_cpu);
+
+  set_value_cpu(static_cast<float*>(t1.get_buffer()->ptr()), size, 2.f);
+  set_value_cpu(static_cast<float*>(t2.get_buffer()->ptr()), size, 3.f);
+
+  kernel::get_add_kernel(base::DeviceType::kDeviceCPU)(t1, t2, out, nullptr);
+  float* output = new float[size];
+  for (int i = 0; i < size; ++i) {
+    output[i] = out.index<float>(i);
+  }
+  for (int i = 0; i < size; ++i) {
+    ASSERT_EQ(output[i], 5.f);
+  }
+  delete[] output;
+}
+
 TEST(test_add_cu, add1_nostream) {
   auto alloc_cu = base::CUDADeviceAllocatorFactory::get_instance();
 
